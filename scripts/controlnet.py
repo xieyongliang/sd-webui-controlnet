@@ -87,11 +87,11 @@ def traverse_all_files(curr_path, model_list):
     return model_list
 
 
-def get_all_models(sort_by, filter_by, path):
+def get_all_models(sort_by, filter_by, path, sagemaker_endpoint):
     res = OrderedDict()
     if shared.cmd_opts.pureui:
         api_endpoint = os.environ['api_endpoint']
-        params = {'module': 'ControlNet'}
+        params = {'module': 'ControlNet', 'endpoint_name': sagemaker_endpoint}
         response = requests.get(url=f'{api_endpoint}/sd/models', params=params)
         if response.status_code == 200:
             items = json.loads(response.text)
@@ -148,7 +148,7 @@ def swap_img2img_pipeline(p: processing.StableDiffusionProcessingImg2Img):
         setattr(p, k, v)
 
 
-def update_cn_models():
+def update_cn_models(sagemaker_endpoint):
     global cn_models, cn_models_names
     res = OrderedDict()
     ext_dirs = (shared.opts.data.get("control_net_models_path", None), getattr(shared.cmd_opts, 'controlnet_dir', None))
@@ -160,7 +160,7 @@ def update_cn_models():
         sort_by = shared.opts.data.get(
             "control_net_models_sort_models_by", "name")
         filter_by = shared.opts.data.get("control_net_models_name_filter", "")
-        found = get_all_models(sort_by, filter_by, path)
+        found = get_all_models(sort_by, filter_by, path, sagemaker_endpoint)
         res = {**found, **res}
 
     cn_models = OrderedDict(**{"None": None}, **res)
@@ -257,9 +257,9 @@ class Script(scripts.Script):
             webcam_enable.click(fn=webcam_toggle, inputs=None, outputs=input_image)
             webcam_mirror.click(fn=webcam_mirror_toggle, inputs=None, outputs=input_image)
 
-            def refresh_all_models(*inputs):
-                update_cn_models()
-                    
+            def refresh_all_models(*inputs, sagemaker_endpoint):
+                update_cn_models(sagemaker_endpoint)
+
                 dd = inputs[0]
                 selected = dd if dd in cn_models else "None"
                 return gr.Dropdown.update(value=selected, choices=list(cn_models.keys()))
@@ -268,7 +268,11 @@ class Script(scripts.Script):
                 module = gr.Dropdown(list(self.preprocessor.keys()), label=f"Preprocessor", value="none")
                 model = gr.Dropdown(list(cn_models.keys()), label=f"Model", value="None")
                 refresh_models = ToolButton(value=refresh_symbol)
-                refresh_models.click(refresh_all_models, model, model)
+                refresh_models.click(
+                    refresh_all_models,
+                    inputs=[model, shared.sagemaker_endpoint_component],
+                    outputs=[model]
+                )
                     # ctrls += (refresh_models, )
             with gr.Row():
                 weight = gr.Slider(label=f"Weight", value=1.0, minimum=0.0, maximum=2.0, step=.05)
