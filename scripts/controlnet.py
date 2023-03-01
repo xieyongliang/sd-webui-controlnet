@@ -96,10 +96,10 @@ def get_all_models(sort_by, filter_by, path, sagemaker_endpoint):
         if response.status_code == 200:
             items = json.loads(response.text)
             for item in items:
+                print(item)
                 name = item['model_name']
                 name_and_hash = item['title']
-                filename = item['filename']
-                res[name_and_hash] = filename
+                res[name_and_hash] = name
     else:
         fileinfos = traverse_all_files(path, [])
         filter_by = filter_by.strip(" ")
@@ -148,28 +148,29 @@ def swap_img2img_pipeline(p: processing.StableDiffusionProcessingImg2Img):
         setattr(p, k, v)
 
 
-def update_cn_models(sagemaker_endpoint):
-    global cn_models, cn_models_names
-    res = OrderedDict()
-    ext_dirs = (shared.opts.data.get("control_net_models_path", None), getattr(shared.cmd_opts, 'controlnet_dir', None))
-    extra_lora_paths = (extra_lora_path for extra_lora_path in ext_dirs
-                if extra_lora_path is not None and os.path.exists(extra_lora_path))
-    paths = [cn_models_dir, cn_models_dir_old, *extra_lora_paths]
+def update_cn_models(sagemaker_endpoint=None):
+    if sagemaker_endpoint:
+        global cn_models, cn_models_names
+        res = OrderedDict()
+        ext_dirs = (shared.opts.data.get("control_net_models_path", None), getattr(shared.cmd_opts, 'controlnet_dir', None))
+        extra_lora_paths = (extra_lora_path for extra_lora_path in ext_dirs
+                    if extra_lora_path is not None and os.path.exists(extra_lora_path))
+        paths = [cn_models_dir, cn_models_dir_old, *extra_lora_paths]
 
-    for path in paths:
-        sort_by = shared.opts.data.get(
-            "control_net_models_sort_models_by", "name")
-        filter_by = shared.opts.data.get("control_net_models_name_filter", "")
-        found = get_all_models(sort_by, filter_by, path, sagemaker_endpoint)
-        res = {**found, **res}
+        for path in paths:
+            sort_by = shared.opts.data.get(
+                "control_net_models_sort_models_by", "name")
+            filter_by = shared.opts.data.get("control_net_models_name_filter", "")
+            found = get_all_models(sort_by, filter_by, path, sagemaker_endpoint)
+            res = {**found, **res}
 
-    cn_models = OrderedDict(**{"None": None}, **res)
-    cn_models_names = {}
-    for name_and_hash, filename in cn_models.items():
-        if filename == None:
-            continue
-        name = os.path.splitext(os.path.basename(filename))[0].lower()
-        cn_models_names[name] = name_and_hash
+        cn_models = OrderedDict(**{"None": None}, **res)
+        cn_models_names = {}
+        for name_and_hash, filename in cn_models.items():
+            if filename == None:
+                continue
+            name = os.path.splitext(os.path.basename(filename))[0].lower()
+            cn_models_names[name] = name_and_hash
 
 
 update_cn_models()
@@ -257,7 +258,8 @@ class Script(scripts.Script):
             webcam_enable.click(fn=webcam_toggle, inputs=None, outputs=input_image)
             webcam_mirror.click(fn=webcam_mirror_toggle, inputs=None, outputs=input_image)
 
-            def refresh_all_models(*inputs, sagemaker_endpoint):
+            def refresh_all_models(*inputs):
+                sagemaker_endpoint = inputs[1]
                 update_cn_models(sagemaker_endpoint)
 
                 dd = inputs[0]
