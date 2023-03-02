@@ -65,7 +65,7 @@ webcam_enabled = False
 webcam_mirrored = False
 
 
-class ToolButton(gr.Button, gr.components.FormComponent):
+class ToolButton(gr.Button):
     """Small button with single emoji as text, fits inside gradio forms"""
 
     def __init__(self, **kwargs):
