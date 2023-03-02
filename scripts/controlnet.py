@@ -424,14 +424,12 @@ class Script(scripts.Script):
         """
         ctrls_group = ()
         max_models = shared.opts.data.get("control_net_max_models_num", 1)
-
-        with gr.Blocks(title="Controlnet"):
-            with gr.Group():
-                if max_models > 1:
-                    for i in range(max_models):
-                        ctrls_group += self.accordion(f"ControlNet - {i}", is_img2img) 
-                else:
-                    ctrls_group += self.accordion(f"ControlNet", is_img2img)
+        with gr.Group():
+            if max_models > 1:
+                for i in range(max_models):
+                    ctrls_group += self.accordion(f"ControlNet - {i}", is_img2img) 
+            else:
+                ctrls_group += self.accordion(f"ControlNet", is_img2img)
 
         return ctrls_group
         
