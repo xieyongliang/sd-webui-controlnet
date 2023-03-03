@@ -149,28 +149,27 @@ def swap_img2img_pipeline(p: processing.StableDiffusionProcessingImg2Img):
 
 
 def update_cn_models(sagemaker_endpoint=None):
-    if sagemaker_endpoint:
-        global cn_models, cn_models_names
-        res = OrderedDict()
-        ext_dirs = (shared.opts.data.get("control_net_models_path", None), getattr(shared.cmd_opts, 'controlnet_dir', None))
-        extra_lora_paths = (extra_lora_path for extra_lora_path in ext_dirs
-                    if extra_lora_path is not None and os.path.exists(extra_lora_path))
-        paths = [cn_models_dir, cn_models_dir_old, *extra_lora_paths]
+    global cn_models, cn_models_names
+    res = OrderedDict()
+    ext_dirs = (shared.opts.data.get("control_net_models_path", None), getattr(shared.cmd_opts, 'controlnet_dir', None))
+    extra_lora_paths = (extra_lora_path for extra_lora_path in ext_dirs
+                if extra_lora_path is not None and os.path.exists(extra_lora_path))
+    paths = [cn_models_dir, cn_models_dir_old, *extra_lora_paths]
 
-        for path in paths:
-            sort_by = shared.opts.data.get(
-                "control_net_models_sort_models_by", "name")
-            filter_by = shared.opts.data.get("control_net_models_name_filter", "")
-            found = get_all_models(sort_by, filter_by, path, sagemaker_endpoint)
-            res = {**found, **res}
+    for path in paths:
+        sort_by = shared.opts.data.get(
+            "control_net_models_sort_models_by", "name")
+        filter_by = shared.opts.data.get("control_net_models_name_filter", "")
+        found = get_all_models(sort_by, filter_by, path, sagemaker_endpoint)
+        res = {**found, **res}
 
-        cn_models = OrderedDict(**{"None": None}, **res)
-        cn_models_names = {}
-        for name_and_hash, filename in cn_models.items():
-            if filename == None:
-                continue
-            name = os.path.splitext(os.path.basename(filename))[0].lower()
-            cn_models_names[name] = name_and_hash
+    cn_models = OrderedDict(**{"None": None}, **res)
+    cn_models_names = {}
+    for name_and_hash, filename in cn_models.items():
+        if filename == None:
+            continue
+        name = os.path.splitext(os.path.basename(filename))[0].lower()
+        cn_models_names[name] = name_and_hash
 
 
 update_cn_models()
