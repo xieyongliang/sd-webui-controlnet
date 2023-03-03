@@ -73,7 +73,6 @@ class ToolButton(gr.Button, gr.components.FormComponent):
 
     def get_block_name(self):
         return "button"
-    
 
 def traverse_all_files(curr_path, model_list):
     f_list = [(os.path.join(curr_path, entry.name), entry.stat())
@@ -435,8 +434,9 @@ class Script(scripts.Script):
         return ctrls_group
         
     def build_control_model(self, p, unet, model, lowvram):
-
         model_path = cn_models.get(model, None)
+        print('--build-control-model----', cn_models, model, model_path)
+
         if model_path is None:
             raise RuntimeError(f"model not found: {model}")
 
