@@ -102,6 +102,7 @@ def get_all_models(sort_by, filter_by, path, sagemaker_endpoint):
                 res[name_and_hash] = name
     else:
         fileinfos = traverse_all_files(path, [])
+        print('---path---:', path, fileinfos)
         filter_by = filter_by.strip(" ")
         if len(filter_by) != 0:
             fileinfos = [x for x in fileinfos if filter_by.lower()
@@ -119,7 +120,7 @@ def get_all_models(sort_by, filter_by, path, sagemaker_endpoint):
             # Prevent a hypothetical "None.pt" from being listed.
             if name != "None":
                 res[name + f" [{sd_models.model_hash(filename)}]"] = filename
-
+        print('----res---:', res)
     return res
 
 
