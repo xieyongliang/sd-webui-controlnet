@@ -51,9 +51,15 @@ cn_models_names = {}  # "my_lora" -> "My_Lora(abcd1234)"
 cn_models_dir = os.path.join(models_path, "ControlNet")
 cn_models_dir_old = os.path.join(scripts.basedir(), "models")
 os.makedirs(cn_models_dir, exist_ok=True)
+print('----script_base_dir:----', scripts.basedir())
+'''
 default_conf = os.path.join(scripts.basedir(), "models", "cldm_v15.yaml")
 default_conf_adapter = os.path.join(scripts.basedir(), "models", "sketch_adapter_v14.yaml")
 cn_detectedmap_dir = os.path.join(scripts.basedir(), "detected_maps")
+'''
+default_conf = os.path.join('/opt/ml/code/extensions/sd-webui-controlnet', "models", "cldm_v15.yaml")
+default_conf_adapter = os.path.join('/opt/ml/code/extensions/sd-webui-controlnet', "models", "sketch_adapter_v14.yaml")
+cn_detectedmap_dir = os.path.join('/opt/ml/code/extensions/sd-webui-controlnet', "detected_maps")
 os.makedirs(cn_detectedmap_dir, exist_ok=True)
 default_detectedmap_dir = cn_detectedmap_dir
 refresh_symbol = '\U0001f504'       # 🔄
