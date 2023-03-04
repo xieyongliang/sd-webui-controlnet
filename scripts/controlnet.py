@@ -51,15 +51,9 @@ cn_models_names = {}  # "my_lora" -> "My_Lora(abcd1234)"
 cn_models_dir = os.path.join(models_path, "ControlNet")
 cn_models_dir_old = os.path.join(scripts.basedir(), "models")
 os.makedirs(cn_models_dir, exist_ok=True)
-print('----script_base_dir:----', scripts.basedir())
-'''
 default_conf = os.path.join(scripts.basedir(), "models", "cldm_v15.yaml")
 default_conf_adapter = os.path.join(scripts.basedir(), "models", "sketch_adapter_v14.yaml")
 cn_detectedmap_dir = os.path.join(scripts.basedir(), "detected_maps")
-'''
-default_conf = os.path.join('/opt/ml/code/extensions/sd-webui-controlnet', "models", "cldm_v15.yaml")
-default_conf_adapter = os.path.join('/opt/ml/code/extensions/sd-webui-controlnet', "models", "sketch_adapter_v14.yaml")
-cn_detectedmap_dir = os.path.join('/opt/ml/code/extensions/sd-webui-controlnet', "detected_maps")
 os.makedirs(cn_detectedmap_dir, exist_ok=True)
 default_detectedmap_dir = cn_detectedmap_dir
 refresh_symbol = '\U0001f504'       # 🔄
@@ -101,13 +95,11 @@ def get_all_models(sort_by, filter_by, path, sagemaker_endpoint):
         if response.status_code == 200:
             items = json.loads(response.text)
             for item in items:
-                print(item)
                 name = item['model_name']
                 name_and_hash = item['title']
                 res[name_and_hash] = name
     else:
         fileinfos = traverse_all_files(path, [])
-        print('---path---:', path, fileinfos)
         filter_by = filter_by.strip(" ")
         if len(filter_by) != 0:
             fileinfos = [x for x in fileinfos if filter_by.lower()
@@ -125,7 +117,6 @@ def get_all_models(sort_by, filter_by, path, sagemaker_endpoint):
             # Prevent a hypothetical "None.pt" from being listed.
             if name != "None":
                 res[name + f" [{sd_models.model_hash(filename)}]"] = filename
-        print('----res---:', res)
     return res
 
 
@@ -440,7 +431,6 @@ class Script(scripts.Script):
         
     def build_control_model(self, p, unet, model, lowvram):
         model_path = cn_models.get(model, None)
-        print('--build-control-model----', cn_models, model, model_path)
 
         if model_path is None:
             raise RuntimeError(f"model not found: {model}")
@@ -482,7 +472,6 @@ class Script(scripts.Script):
         You can modify the processing object (p) here, inject hooks, etc.
         args contains all values returned by components from ui()
         """
-        print('---args---:', len(args), args)
         unet = p.sd_model.model.diffusion_model
         if self.latest_network is not None:
             # always restore (~0.05s)

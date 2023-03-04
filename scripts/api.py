@@ -197,8 +197,6 @@ def controlnet_api(_: gr.Blocks, app: FastAPI):
             # 0, False, False, False, False, '', 1, '', 0, '', 0, '', True, False, False, False # todo: extend to include wither alwaysvisible scripts
         )
 
-        print(p.script_args)
-
         if cmd_opts.enable_console_prompts:
             print(f"\ntxt2img: {prompt}", file=shared.progress_print_out)
 
