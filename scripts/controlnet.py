@@ -90,14 +90,15 @@ def get_all_models(sort_by, filter_by, path, sagemaker_endpoint):
     res = OrderedDict()
     if shared.cmd_opts.pureui:
         api_endpoint = os.environ['api_endpoint']
-        params = {'module': 'ControlNet', 'endpoint_name': sagemaker_endpoint}
-        response = requests.get(url=f'{api_endpoint}/sd/models', params=params)
-        if response.status_code == 200:
-            items = json.loads(response.text)
-            for item in items:
-                name = item['model_name']
-                name_and_hash = item['title']
-                res[name_and_hash] = name
+        if sagemaker_endpoint:
+            params = {'module': 'ControlNet', 'endpoint_name': sagemaker_endpoint}
+            response = requests.get(url=f'{api_endpoint}/sd/models', params=params)
+            if response.status_code == 200:
+                items = json.loads(response.text)
+                for item in items:
+                    name = item['model_name']
+                    name_and_hash = item['title']
+                    res[name_and_hash] = name
     else:
         fileinfos = traverse_all_files(path, [])
         filter_by = filter_by.strip(" ")
