@@ -9,7 +9,7 @@ import modules.scripts as scripts
 from modules import shared, devices, script_callbacks, processing, masking, images
 import gradio as gr
 import numpy as np
-
+import traceback
 from einops import rearrange
 from scripts.cldm import PlugableControlModel
 from scripts.processor import *
@@ -168,10 +168,14 @@ def update_cn_models(sagemaker_endpoint=None):
             continue
         name = os.path.splitext(os.path.basename(filename))[0].lower()
         cn_models_names[name] = name_and_hash
-
+    ## debug log by River
+    print(f'---update_cn_models()---cn_models:{cn_models}-{id(cn_models)}-cn_models_names:{cn_models_names}')
+    print('update_cn_models()-pid:',os.getpid())
 
 update_cn_models()
-
+print('cn_models:',cn_models,id(cn_models))
+print(f'ncn_models_names:{cn_models_names},,,,pid:{os.getpid()}')
+traceback.print_stack()
 
 class Script(scripts.Script):
     def __init__(self) -> None:
@@ -431,8 +435,10 @@ class Script(scripts.Script):
         return ctrls_group
         
     def build_control_model(self, p, unet, model, lowvram):
+        print (f'-----cn_models:{cn_models}--{id(cn_models)}')
+        print('pid:',os.getpid())
+        # traceback.print_stack()
         model_path = cn_models.get(model, None)
-
         if model_path is None:
             raise RuntimeError(f"model not found: {model}")
 
@@ -443,7 +449,7 @@ class Script(scripts.Script):
         if not os.path.exists(model_path):
             raise ValueError(f"file not found: {model_path}")
 
-        print(f"Loading model: {model}")
+        print(f"Loading model: {model} from {model_path}")
         state_dict = load_state_dict(model_path)
         network_module = PlugableControlModel
         network_config = shared.opts.data.get("control_net_model_config", default_conf)
@@ -746,4 +752,6 @@ class Img2ImgTabTracker:
 img2img_tab_tracker = Img2ImgTabTracker()
 script_callbacks.on_ui_settings(on_ui_settings)
 script_callbacks.on_after_component(img2img_tab_tracker.on_after_component_callback)
-
+##Add by River
+script_callbacks.on_update_cn_models(update_cn_models)
+##End by River
