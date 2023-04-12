@@ -173,9 +173,6 @@ def update_cn_models(sagemaker_endpoint=None):
     print('update_cn_models()-pid:',os.getpid())
 
 update_cn_models()
-print('cn_models:',cn_models,id(cn_models))
-print(f'ncn_models_names:{cn_models_names},,,,pid:{os.getpid()}')
-traceback.print_stack()
 
 class Script(scripts.Script):
     def __init__(self) -> None:
@@ -435,9 +432,6 @@ class Script(scripts.Script):
         return ctrls_group
         
     def build_control_model(self, p, unet, model, lowvram):
-        print (f'-----cn_models:{cn_models}--{id(cn_models)}')
-        print('pid:',os.getpid())
-        # traceback.print_stack()
         model_path = cn_models.get(model, None)
         if model_path is None:
             raise RuntimeError(f"model not found: {model}")
