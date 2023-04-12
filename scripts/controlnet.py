@@ -746,4 +746,4 @@ class Img2ImgTabTracker:
 img2img_tab_tracker = Img2ImgTabTracker()
 script_callbacks.on_ui_settings(on_ui_settings)
 script_callbacks.on_after_component(img2img_tab_tracker.on_after_component_callback)
-
+script_callbacks.on_update_cn_models(update_cn_models)
