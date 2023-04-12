@@ -169,6 +169,7 @@ def update_cn_models(sagemaker_endpoint=None):
         name = os.path.splitext(os.path.basename(filename))[0].lower()
         cn_models_names[name] = name_and_hash
 
+
 update_cn_models()
 
 
@@ -431,7 +432,6 @@ class Script(scripts.Script):
         
     def build_control_model(self, p, unet, model, lowvram):
         model_path = cn_models.get(model, None)
- 
         if model_path is None:
             raise RuntimeError(f"model not found: {model}")
 
