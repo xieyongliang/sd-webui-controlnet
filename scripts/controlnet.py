@@ -420,7 +420,7 @@ class Script(scripts.Script):
         Values of those returned components will be passed to run() and process() functions.
         """
         ctrls_group = ()
-        max_models = shared.opts.data.get("control_net_max_models_num", 1)
+        max_models = shared.opts.data.get("control_net_max_models_num", 10)
         with gr.Group():
             if max_models > 1:
                 for i in range(max_models):
