@@ -64,7 +64,6 @@ reverse_symbol = '\U000021C4'       # ⇄
 webcam_enabled = False
 webcam_mirrored = False
 
-
 class ToolButton(gr.Button, gr.components.FormComponent):
     """Small button with single emoji as text, fits inside gradio forms"""
 
@@ -229,8 +228,8 @@ class Script(scripts.Script):
 
             with gr.Row():
                 gr.HTML(value='<p>Invert colors if your image has white background.<br >Change your brush width to make it thinner if you want to draw something.<br ></p>')
-                webcam_enable = ToolButton(value=camera_symbol)
-                webcam_mirror = ToolButton(value=reverse_symbol)
+                webcam_enable = ToolButton(value=camera_symbol, elem_id='camera_symbol')
+                webcam_mirror = ToolButton(value=reverse_symbol, elem_id='reverse_symbol')
 
             with gr.Row():
                 enabled = gr.Checkbox(label='Enable', value=False)
@@ -266,7 +265,7 @@ class Script(scripts.Script):
             with gr.Row():
                 module = gr.Dropdown(list(self.preprocessor.keys()), label=f"Preprocessor", value="none")
                 model = gr.Dropdown(list(cn_models.keys()), label=f"Model", value="None")
-                refresh_models = ToolButton(value=refresh_symbol)
+                refresh_models = ToolButton(value=refresh_symbol, elem_id='refresh_controlnet')
                 refresh_models.click(
                     refresh_all_models,
                     inputs=[model, shared.sagemaker_endpoint_component],
@@ -379,7 +378,7 @@ class Script(scripts.Script):
                     canvas_height = gr.Slider(label="Canvas Height", minimum=256, maximum=1024, value=512, step=64)
                         
                 if gradio_compat:
-                    canvas_swap_res = ToolButton(value=switch_values_symbol)
+                    canvas_swap_res = ToolButton(value=switch_values_symbol, elem_id='switch_values_symbol')
                     canvas_swap_res.click(lambda w, h: (h, w), inputs=[canvas_width, canvas_height], outputs=[canvas_width, canvas_height])
                         
             create_button = gr.Button(value="Create blank canvas")
@@ -421,10 +420,13 @@ class Script(scripts.Script):
         """
         ctrls_group = ()
         max_models = shared.opts.data.get("control_net_max_models_num", 10)
-        with gr.Group():
+        elem_id_tabname = ("img2img" if is_img2img else "txt2img") + "_controlnet"
+        with gr.Group(elem_id=elem_id_tabname):
             if max_models > 1:
-                for i in range(max_models):
-                    ctrls_group += self.accordion(f"ControlNet - {i}", is_img2img) 
+                with gr.Tabs(elem_id=f"{elem_id_tabname}_tabs"):
+                    for i in range(max_models):
+                        with gr.Tab(f"ControlNet Unit {i}"):
+                            ctrls_group += self.accordion(f"ControlNet - {i}", is_img2img)
             else:
                 ctrls_group += self.accordion(f"ControlNet", is_img2img)
 
@@ -686,7 +688,7 @@ def on_ui_settings():
         "", "Extra path to scan for ControlNet models (e.g. training output directory)", section=section))
 
     shared.opts.add_option("control_net_max_models_num", shared.OptionInfo(
-        1, "Multi ControlNet: Max models amount (requires restart)", gr.Slider, {"minimum": 1, "maximum": 10, "step": 1}, section=section))
+        10, "Multi ControlNet: Max models amount (requires restart)", gr.Slider, {"minimum": 1, "maximum": 10, "step": 1, "interactive": False}, section=section))
     shared.opts.add_option("control_net_model_cache_size", shared.OptionInfo(
         2, "Model cache size (requires restart)", gr.Slider, {"minimum": 0, "maximum": 5, "step": 1}, section=section))
     shared.opts.add_option("control_net_control_transfer", shared.OptionInfo(
