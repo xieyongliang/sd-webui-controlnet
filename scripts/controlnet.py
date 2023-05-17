@@ -1420,3 +1420,4 @@ def on_after_component(component, **_kwargs):
 batch_hijack.instance.do_hijack()
 script_callbacks.on_ui_settings(on_ui_settings)
 script_callbacks.on_after_component(on_after_component)
+script_callbacks.on_update_cn_models(global_state.update_cn_models)
