@@ -1001,7 +1001,7 @@ def on_ui_settings():
     shared.opts.add_option("control_net_modules_path", shared.OptionInfo(
         "", "Path to directory containing annotator model directories (requires restart, overrides corresponding command line flag)", section=section))
     shared.opts.add_option("control_net_max_models_num", shared.OptionInfo(
-        3, "Multi ControlNet: Max models amount (requires restart)", gr.Slider, {"minimum": 1, "maximum": 10, "step": 1}, section=section))
+        10, "Multi ControlNet: Max models amount (requires restart)", gr.Slider, {"minimum": 1, "maximum": 10, "step": 1}, section=section))
     shared.opts.add_option("control_net_model_cache_size", shared.OptionInfo(
         1, "Model cache size (requires restart)", gr.Slider, {"minimum": 1, "maximum": 5, "step": 1}, section=section))
     shared.opts.add_option("control_net_no_detectmap", shared.OptionInfo(
@@ -1025,3 +1025,4 @@ def on_ui_settings():
 batch_hijack.instance.do_hijack()
 script_callbacks.on_ui_settings(on_ui_settings)
 script_callbacks.on_after_component(ControlNetUiGroup.on_after_component)
+script_callbacks.on_update_cn_models(global_state.update_cn_models)

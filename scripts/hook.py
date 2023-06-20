@@ -109,7 +109,7 @@ if getattr(modules.processing, 'create_random_tensors_original', None) is None:
 modules.processing.create_random_tensors = create_random_tensors_hacked
 
 
-class ControlModelType(Enum):
+class ControlModelType(str, Enum):
     """
     The type of Control Models (supported or not).
     """
@@ -127,7 +127,7 @@ class ControlModelType(Enum):
 
 
 # Written by Lvmin
-class AutoMachine(Enum):
+class AutoMachine(str, Enum):
     """
     Lvmin's algorithm for Attention/AdaIn AutoMachine States.
     """

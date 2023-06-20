@@ -397,8 +397,8 @@ def add_axis_options(xyz_grid):
     def choices_bool():
         return ["False", "True"]
 
-    def choices_model():
-        update_cn_models()
+    def choices_model(sagemaker_endpoint):
+        update_cn_models(sagemaker_endpoint)
         return list(cn_models_names.values())
 
     def choices_control_mode():

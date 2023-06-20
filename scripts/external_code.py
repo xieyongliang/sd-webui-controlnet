@@ -13,7 +13,7 @@ def get_api_version() -> int:
     return 2
 
 
-class ControlMode(Enum):
+class ControlMode(str, Enum):
     """
     The improved guess mode.
     """
@@ -23,7 +23,7 @@ class ControlMode(Enum):
     CONTROL = "ControlNet is more important"
 
 
-class ResizeMode(Enum):
+class ResizeMode(str, Enum):
     """
     Resize modes for ControlNet input images.
     """

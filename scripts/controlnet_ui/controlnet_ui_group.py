@@ -453,7 +453,9 @@ class ControlNetUiGroup(object):
 
     def register_refresh_all_models(self):
         def refresh_all_models(*inputs):
-            global_state.update_cn_models()
+            sagemaker_endpoint = inputs[1]
+
+            global_state.update_cn_models(sagemaker_endpoint)
 
             dd = inputs[0]
             selected = dd if dd in global_state.cn_models else "None"
@@ -461,7 +463,11 @@ class ControlNetUiGroup(object):
                 value=selected, choices=list(global_state.cn_models.keys())
             )
 
-        self.refresh_models.click(refresh_all_models, self.model, self.model)
+        self.refresh_models.click(
+            refresh_all_models, 
+            [self.model, shared.sagemaker_endpoint_component], 
+            self.model
+        )
 
     def register_build_sliders(self):
         if not self.gradio_compat:

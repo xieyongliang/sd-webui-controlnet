@@ -11,6 +11,9 @@ from scripts.logging import logger
 
 from typing import Dict, Callable, Optional
 
+import requests
+import json
+
 CN_MODEL_EXTS = [".pt", ".pth", ".ckpt", ".safetensors"]
 cn_models_dir = os.path.join(models_path, "ControlNet")
 cn_models_dir_old = os.path.join(scripts.basedir(), "models")
@@ -173,31 +176,43 @@ def traverse_all_files(curr_path, model_list):
     return model_list
 
 
-def get_all_models(sort_by, filter_by, path):
+def get_all_models(sort_by, filter_by, path, sagemaker_endpoint):
     res = OrderedDict()
-    fileinfos = traverse_all_files(path, [])
-    filter_by = filter_by.strip(" ")
-    if len(filter_by) != 0:
-        fileinfos = [x for x in fileinfos if filter_by.lower()
-                     in os.path.basename(x[0]).lower()]
-    if sort_by == "name":
-        fileinfos = sorted(fileinfos, key=lambda x: os.path.basename(x[0]))
-    elif sort_by == "date":
-        fileinfos = sorted(fileinfos, key=lambda x: -x[1].st_mtime)
-    elif sort_by == "path name":
-        fileinfos = sorted(fileinfos)
+    if shared.cmd_opts.pureui:
+        api_endpoint = os.environ['api_endpoint']
+        if sagemaker_endpoint:
+            params = {'module': 'ControlNet', 'endpoint_name': sagemaker_endpoint}
+            response = requests.get(url=f'{api_endpoint}/sd/models', params=params)
+            if response.status_code == 200:
+                items = json.loads(response.text)
+                for item in items:
+                    name = item['model_name']
+                    name_and_hash = item['title']
+                    res[name_and_hash] = name
+    else:
+        fileinfos = traverse_all_files(path, [])
+        filter_by = filter_by.strip(" ")
+        if len(filter_by) != 0:
+            fileinfos = [x for x in fileinfos if filter_by.lower()
+                        in os.path.basename(x[0]).lower()]
+        if sort_by == "name":
+            fileinfos = sorted(fileinfos, key=lambda x: os.path.basename(x[0]))
+        elif sort_by == "date":
+            fileinfos = sorted(fileinfos, key=lambda x: -x[1].st_mtime)
+        elif sort_by == "path name":
+            fileinfos = sorted(fileinfos)
 
-    for finfo in fileinfos:
-        filename = finfo[0]
-        name = os.path.splitext(os.path.basename(filename))[0]
-        # Prevent a hypothetical "None.pt" from being listed.
-        if name != "None":
-            res[name + f" [{sd_models.model_hash(filename)}]"] = filename
+        for finfo in fileinfos:
+            filename = finfo[0]
+            name = os.path.splitext(os.path.basename(filename))[0]
+            # Prevent a hypothetical "None.pt" from being listed.
+            if name != "None":
+                res[name + f" [{sd_models.model_hash(filename)}]"] = filename
 
     return res
 
 
-def update_cn_models():
+def update_cn_models(sagemaker_endpoint=None):
     cn_models.clear()
     ext_dirs = (shared.opts.data.get("control_net_models_path", None), getattr(shared.cmd_opts, 'controlnet_dir', None))
     extra_lora_paths = (extra_lora_path for extra_lora_path in ext_dirs
@@ -208,7 +223,7 @@ def update_cn_models():
         sort_by = shared.opts.data.get(
             "control_net_models_sort_models_by", "name")
         filter_by = shared.opts.data.get("control_net_models_name_filter", "")
-        found = get_all_models(sort_by, filter_by, path)
+        found = get_all_models(sort_by, filter_by, path, sagemaker_endpoint)
         cn_models.update({**found, **cn_models})
 
     # insert "None" at the beginning of `cn_models` in-place

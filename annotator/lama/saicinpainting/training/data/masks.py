@@ -13,7 +13,7 @@ from annotator.lama.saicinpainting.utils import LinearRamp
 LOGGER = logging.getLogger(__name__)
 
 
-class DrawMethod(Enum):
+class DrawMethod(str, Enum):
     LINE = 'line'
     CIRCLE = 'circle'
     SQUARE = 'square'
